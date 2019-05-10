@@ -1,9 +1,6 @@
 import math
 import operator
 
-def alpha(actualIndex, totalIndex):
-    return 0.5 * (1 - ((actualIndex)/ totalIndex))
-
 class Instance:
     def __init__(self, id, params, classification):
         self.id = id
@@ -36,10 +33,11 @@ class Instance:
             if len(self.distancesToInstances) < k:
                 self.distancesToInstances.append(distInst)
                 
-    
     # Retorna a classe pertencente da instancia
     def classify(self, numNeighbor, classes):
         dictClass = {}
+
+        print(self.distancesToInstances[0][0])
 
         for clas in classes:
             dictClass[clas] = 0
@@ -49,12 +47,3 @@ class Instance:
             dictClass[classification] += 1
 
         return max(dictClass.items(), key=operator.itemgetter(1))[0]
-
-    def adjustParam(self, neighbor, aprox, indAtual, totalInd):
-        i = 0
-        while i < len(self.params):
-            if aprox:
-                self.params[i] += alpha(indAtual, totalInd) * (neighbor.params[i] - self.params[i])
-            else:
-                self.params[i] -= alpha(indAtual, totalInd) * (neighbor.params[i] - self.params[i])
-            i += 1
