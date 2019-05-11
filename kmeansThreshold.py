@@ -56,7 +56,7 @@ def measureAccuracy(classes, centroid, tests, minArg, maxArg, k, threshold):
 	
 	return ("Accuracy: %.2f%%\n" % (accuracy * 100))
 
-def knnThreshold():
+def kmeansThreshold():
 	classes = []
 	instances = []
 	minArg = []
@@ -78,4 +78,4 @@ def knnThreshold():
 		print("Tempo gasto: " + str(time.time() - startTime))
 		print("------------------------------------------------------------------------------------")
 
-knnThreshold()
+kmeansThreshold()
