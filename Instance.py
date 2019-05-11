@@ -34,13 +34,14 @@ class Instance:
                 self.distancesToInstances.append(distInst)
                 
     # Retorna a classe pertencente da instancia
-    def classify(self, numNeighbor, classes):
+    def classify(self, numNeighbor, classes, threshold):
         dictClass = {}
-
-        print(self.distancesToInstances[0][0])
 
         for clas in classes:
             dictClass[clas] = 0
+
+        if self.distancesToInstances[0][0] > threshold:
+            return "true"
 
         for i in range(0, numNeighbor):
             classification = self.distancesToInstances[i][1].classification
