@@ -8,8 +8,6 @@ from readCsv import readCsv
 def calculateThreshold(instances, minArg, maxArg):
 	threshold = 0
 	centroid = Instance(-1, [], instances[0].classification)
-	distances = []
-	alpha = 0.45
 
 	for instance in instances: 
 		for i, param in enumerate(instance.params):
@@ -23,10 +21,9 @@ def calculateThreshold(instances, minArg, maxArg):
 
 	for instance in instances:
 		distance = centroid.euclideanDistance(instance, minArg, maxArg)
-		distances.append(distance)
 		threshold += distance
 	
-	threshold = (threshold / len(instances)) * alpha
+	threshold = threshold / len(instances)
 
 	return threshold, centroid
 
@@ -39,22 +36,37 @@ def knnClassif(classes, centroid, minArg, maxArg, instance, k, threshold):
 
 
 def measureAccuracy(classes, centroid, tests, minArg, maxArg, k, threshold):
-	hit    = 0                      # numero de acertos em cada teste de crossfold
-	accuracy = 0                    # taxa de acurácia
-	size = len(tests)
+	size = len(tests)						# Tamanho do conjunto de dados
+	trueNegative = 0						# Número de verdadeiros negativos 
+	truePositive = 0						# Número verdadeiros positivos 
+	falseNegative = 0						# Número de falsos negativos
+	falsePositive = 0						# Número de falsos positivos
 
 	# calcula todas as distancias para i-esima instancia do conjunto de teste e classifica de acordo com os k vizinhos mais proximos
-	print("threshold: " + str(threshold))
 	for i, testInstance in enumerate(tests):
 		knnClassification = knnClassif(classes, centroid, minArg, maxArg, testInstance, k, threshold)
-		#print(testInstance.distancesToInstances[0])
+		
+		# Conta o numero de instancias, negativos verdadeiros, positivos verdadeiros, falso negativos e falsos positivos do dataset
 		if knnClassification == testInstance.classification:
-			#print(testInstance.distancesToInstances[0][0])
-			hit += 1
+			if knnClassification == "true":
+				trueNegative += 1
+			else:
+				truePositive += 1
+		else:
+			if knnClassification == "true":
+				falseNegative += 1
+			else:
+				falsePositive += 1
+		
+	# calcula os parametros de medida de acurácia
+	precision = truePositive / (truePositive + falsePositive)
+	recall = truePositive / (truePositive + falseNegative)
+	f_measure = (2 * truePositive) / ((2 * truePositive) + falsePositive + falseNegative)
 
-	accuracy += (hit/len(tests))
+	print("Recall: %.2f%%" % (recall * 100))
+	print("Precision: %.2f%%" % (precision * 100))
+	print("F1-measure: %.2f%%\n" % (f_measure * 100))
 	
-	return ("Accuracy: %.2f%%\n" % (accuracy * 100))
 
 def kmeansThreshold():
 	classes = []
@@ -63,18 +75,18 @@ def kmeansThreshold():
 	maxArg = []
 	kValues = [1]
 	oneClassDatasets = ["./oneClassDatasets/JM1_software_defect_prediction.csv", "./oneClassDatasets/PC1_software_defect_prediction.csv"]
-	testDatasets = ["./testDatasets/testJM1_software_defect_prediction.csv", "./testDatasets/testJM1_software_defect_prediction.csv"]
+	testDatasets = ["./testDatasets/testJM1_software_defect_prediction.csv", "./testDatasets/testPC1_software_defect_prediction.csv"]
 
 	for i, trainDataset in enumerate(oneClassDatasets):
 		
 		datasetName = trainDataset.split("/")
-		print("\nDataset: " + datasetName[2])
+		print("\nDataset: " + datasetName[2] + "\n")
 		
 		startTime = time.time()
 		classes, instances, minArg, maxArg = readCsv(trainDataset)
 		_, testInstances, _, _ = readCsv(testDatasets[i])
 		threshold, centroid = calculateThreshold(instances, minArg, maxArg)
-		print(measureAccuracy(classes, centroid, testInstances, minArg, maxArg, 1, threshold))
+		measureAccuracy(classes, centroid, testInstances, minArg, maxArg, 1, threshold)
 		print("Tempo gasto: " + str(time.time() - startTime))
 		print("------------------------------------------------------------------------------------")
 
